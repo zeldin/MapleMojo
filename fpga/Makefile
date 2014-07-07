@@ -10,6 +10,10 @@ maplemojo_TOP_MODULE := maplemojo_top
 maplemojo_VERILOG_SOURCES := \
 	$(SRC)/maplemojo_top.v \
 	$(SRC)/maple_ports.v \
+	$(SRC)/regaccess.v \
+	$(SRC)/read_only_reg.v \
+	$(SRC)/read_write_reg.v \
+	$(SRC)/spi_slave.v \
 	$(SRC)/ocpin.v
 
 maplemojo_CONSTRAINT_FILES := \

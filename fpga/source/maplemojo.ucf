@@ -17,10 +17,11 @@ NET "led<5>" LOC = P126;
 NET "led<6>" LOC = P124;
 NET "led<7>" LOC = P123;
 
-# NET "spi_mosi" LOC = P44;
-# NET "spi_miso" LOC = P45;
-# NET "spi_ss" LOC = P48;
-# NET "spi_sck" LOC = P43;
+NET "spi_mosi" LOC = P44;
+NET "spi_miso" LOC = P45;
+NET "spi_ss" LOC = P48;
+NET "spi_sck" LOC = P43;
+
 # NET "spi_channel<0>" LOC = P46;
 # NET "spi_channel<1>" LOC = P61;
 # NET "spi_channel<2>" LOC = P62;

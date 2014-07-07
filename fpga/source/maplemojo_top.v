@@ -16,9 +16,20 @@ module maplemojo_top(
     inout porta_pin4,
     inout portb_pin4,
     inout portc_pin4,
-    inout portd_pin4
+    inout portd_pin4,
+
+    inout spi_miso,
+    input spi_ss,
+    input spi_mosi,
+    input spi_sck,
     );
 
+   localparam VERSION = 8'ha6;
+   
+   localparam REG_VERSION = 0;
+   localparam REG_SCRATCHPAD = 1;
+   localparam NUM_REGS = 2;
+   
    wire   rst = ~rst_n;
 
    assign led[7:0] = 8'b0;
@@ -30,6 +41,13 @@ module maplemojo_top(
 
    wire[1:0] port_select;
    assign port_select = 2'b00;
+
+   wire [NUM_REGS-1:0] reg_cs;
+   wire reg_we;
+   wire [7:0] reg_data_read;
+   wire [7:0] reg_data_write;
+
+   wire spi_miso_out;
    
    reg 	  out_p1_d, out_p1_q;
    reg 	  out_p5_d, out_p5_q;
@@ -70,6 +88,25 @@ module maplemojo_top(
       .in_p1(in_p1),
       .in_p5(in_p5)
       );
+
+   regaccess #(NUM_REGS) reg_file
+     (
+      .clk(clk),
+      .rst(rst),
+      .ss(spi_ss),
+      .mosi(spi_mosi),
+      .miso(spi_miso_out),
+      .sck(spi_sck),
+      .cs(reg_cs),
+      .regdata_read(reg_data_read),
+      .regdata_write(reg_data_write),
+      .we(reg_we)
+     );
+
+   assign spi_miso = (spi_ss? 1'bz : spi_miso_out);
    
+   read_only_reg version_reg(reg_cs[REG_VERSION], reg_we, reg_data_read, VERSION);
+   read_write_reg scratchpad_reg(rst, clk, reg_cs[REG_SCRATCHPAD], reg_we, reg_data_read, reg_data_write);
+
 endmodule // maplemojo_top
 
