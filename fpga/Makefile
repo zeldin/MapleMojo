@@ -9,6 +9,7 @@ maplemojo_TOP_MODULE := maplemojo_top
 
 maplemojo_VERILOG_SOURCES := \
 	$(SRC)/maplemojo_top.v \
+	$(SRC)/maple_interface.v \
 	$(SRC)/maple_ports.v \
 	$(SRC)/regaccess.v \
 	$(SRC)/clock_divider.v \
