@@ -10,7 +10,7 @@ module clock_divider(
    assign tick = (cnt_q == 1);
    
    always @(*) begin
-      cnt_d = cnt_q + 1;
+      cnt_d = cnt_q + 1'b1;
       if (cnt_q == divider) begin
 	 cnt_d = 0;
       end

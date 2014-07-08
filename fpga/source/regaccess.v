@@ -23,8 +23,10 @@ module regaccess(clk, rst, ss, mosi, miso, sck, cs, regdata_read, regdata_write,
    reg first_d, first_q;
    reg read_d, read_q;
    reg write_d, write_q;
-   
-   assign cs = (read_q || write_q ? 1<<regnum_q : 0);
+
+   wire [31:0] tmp_cs;
+   assign tmp_cs = (read_q || write_q ? 1<<regnum_q : 0);
+   assign cs = tmp_cs[num_regs-1:0];
    assign we = we_q;
    assign regdata_write = (we_q && !rst && regnum_q < num_regs? dout : 8'bz);
    assign din = (read_q? regdata_read : 8'b0);

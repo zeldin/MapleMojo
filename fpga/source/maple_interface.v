@@ -27,7 +27,7 @@ module maple_interface(
    
    assign pin4 = 4'bzzzz;
 
-   wire[1:0] port_select;
+   wire[7:0] port_select;
 
    wire [NUM_REGS-1:0] reg_cs;
    wire reg_we;
@@ -48,7 +48,7 @@ module maple_interface(
      (
       .pin1(pin1),
       .pin5(pin5),
-      .port_select(port_select),
+      .port_select(port_select[1:0]),
       .out_p1(out_p1),
       .out_p5(out_p5),
       .oe(maple_oe),
@@ -73,7 +73,7 @@ module maple_interface(
    assign spi_miso = (spi_ss? 1'bz : spi_miso_out);
    
    read_only_reg version_reg(reg_cs[REG_VERSION], reg_we, reg_data_read, VERSION);
-   read_write_reg scratchpad_reg(rst, clk, reg_cs[REG_SCRATCHPAD], reg_we, reg_data_read, reg_data_write);
+   read_write_reg scratchpad_reg(rst, clk, reg_cs[REG_SCRATCHPAD], reg_we, reg_data_read, reg_data_write, );
    read_write_reg #(CLOCKDIV_INIT) clockdiv_reg(rst, clk, reg_cs[REG_CLOCKDIV], reg_we, reg_data_read, reg_data_write, clock_div);
    read_write_reg port_select_reg(rst, clk, reg_cs[REG_PORTSEL], reg_we, reg_data_read, reg_data_write, port_select);
    maple_out out_ctrl(rst, clk, reg_cs[REG_OUTCTRL], reg_we, reg_data_read, reg_data_write, out_p1, out_p5, maple_oe);
