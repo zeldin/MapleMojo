@@ -25,10 +25,13 @@ module maplemojo_top(
     );
 
    localparam VERSION = 8'ha6;
+
+   localparam CLOCKDIV_INIT = 8'h6;
    
    localparam REG_VERSION = 0;
    localparam REG_SCRATCHPAD = 1;
-   localparam NUM_REGS = 2;
+   localparam REG_CLOCKDIV = 2;
+   localparam NUM_REGS = 3;
    
    wire   rst = ~rst_n;
 
@@ -48,6 +51,9 @@ module maplemojo_top(
    wire [7:0] reg_data_write;
 
    wire spi_miso_out;
+
+   wire tick;
+   wire [7:0] clock_div;
    
    reg 	  out_p1_d, out_p1_q;
    reg 	  out_p5_d, out_p5_q;
@@ -107,6 +113,9 @@ module maplemojo_top(
    
    read_only_reg version_reg(reg_cs[REG_VERSION], reg_we, reg_data_read, VERSION);
    read_write_reg scratchpad_reg(rst, clk, reg_cs[REG_SCRATCHPAD], reg_we, reg_data_read, reg_data_write);
+   read_write_reg #(CLOCKDIV_INIT) clockdiv_reg(rst, clk, reg_cs[REG_CLOCKDIV], reg_we, reg_data_read, reg_data_write, clock_div);
+
+   clock_divider clkdiv(clk, rst, clock_div, tick);
 
 endmodule // maplemojo_top
 

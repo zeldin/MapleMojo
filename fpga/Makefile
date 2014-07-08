@@ -11,6 +11,7 @@ maplemojo_VERILOG_SOURCES := \
 	$(SRC)/maplemojo_top.v \
 	$(SRC)/maple_ports.v \
 	$(SRC)/regaccess.v \
+	$(SRC)/clock_divider.v \
 	$(SRC)/read_only_reg.v \
 	$(SRC)/read_write_reg.v \
 	$(SRC)/spi_slave.v \

@@ -5,8 +5,10 @@ module read_write_reg(
 		input we,
 		inout [7:0] regdata_out,
 		input [7:0] regdata_in,
-		output reg_contents
+		output [7:0] reg_contents
 		);
+
+   parameter reset_val = 0;
 
    reg [7:0] reg_d, reg_q;
 
@@ -22,7 +24,7 @@ module read_write_reg(
 
    always @(posedge clk) begin
       if (rst) begin
-	 reg_q <= 8'b0;
+	 reg_q <= reset_val;
       end else begin
 	 reg_q <= reg_d;
       end
