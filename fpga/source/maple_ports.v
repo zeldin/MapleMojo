@@ -1,6 +1,6 @@
 module maple_ports(
-    inout[3:0] pin1,
-    inout[3:0] pin5,
+    inout[0:3] pin1,
+    inout[0:3] pin5,
     input[1:0] port_select,
     input out_p1,
     input out_p5,

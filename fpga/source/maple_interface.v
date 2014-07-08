@@ -2,9 +2,9 @@ module maple_interface(
     input clk,
     input rst,
 
-    inout[3:0] pin1,
-    inout[3:0] pin5,
-    inout[3:0] pin4,
+    inout[0:3] pin1,
+    inout[0:3] pin5,
+    inout[0:3] pin4,
 
     inout spi_miso,
     input spi_ss,
