@@ -23,7 +23,8 @@ module maple_interface(
    localparam REG_CLOCKDIV = 2;
    localparam REG_PORTSEL = 3;
    localparam REG_OUTCTRL = 4;
-   localparam NUM_REGS = 5;
+   localparam REG_FIFO = 5;
+   localparam NUM_REGS = 6;
    
    assign pin4 = 4'bzzzz;
 
@@ -43,6 +44,10 @@ module maple_interface(
    wire   out_p1;
    wire   out_p5;
    wire   maple_oe;
+
+   wire [7:0] write_data;
+   wire       write_fifo_consume;
+   wire       write_data_avail;
    
    maple_ports phys_ports
      (
@@ -76,7 +81,9 @@ module maple_interface(
    read_write_reg scratchpad_reg(rst, clk, reg_cs[REG_SCRATCHPAD], reg_we, reg_data_read, reg_data_write, );
    read_write_reg #(CLOCKDIV_INIT) clockdiv_reg(rst, clk, reg_cs[REG_CLOCKDIV], reg_we, reg_data_read, reg_data_write, clock_div);
    read_write_reg port_select_reg(rst, clk, reg_cs[REG_PORTSEL], reg_we, reg_data_read, reg_data_write, port_select);
-   maple_out out_ctrl(rst, clk, reg_cs[REG_OUTCTRL], reg_we, reg_data_read, reg_data_write, out_p1, out_p5, maple_oe, tick);
+   maple_out out_ctrl(rst, clk, reg_cs[REG_OUTCTRL], reg_we, reg_data_read, reg_data_write, out_p1, out_p5, maple_oe, tick, write_data, write_fifo_avail, write_fifo_consume);
+
+   fifo #(16) write_fifo(rst, clk, reg_data_write, reg_we&&reg_cs[REG_FIFO], , , write_data, write_fifo_consume, write_fifo_avail, );
    
    clock_divider clkdiv(clk, rst, clock_div, tick);
    
