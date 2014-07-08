@@ -21,12 +21,13 @@ module maple_interface(
    localparam REG_VERSION = 0;
    localparam REG_SCRATCHPAD = 1;
    localparam REG_CLOCKDIV = 2;
-   localparam NUM_REGS = 3;
+   localparam REG_PORTSEL = 3;
+   localparam REG_OUTCTRL = 4;
+   localparam NUM_REGS = 5;
    
    assign pin4 = 4'bzzzz;
 
    wire[1:0] port_select;
-   assign port_select = 2'b00;
 
    wire [NUM_REGS-1:0] reg_cs;
    wire reg_we;
@@ -37,42 +38,20 @@ module maple_interface(
 
    wire [7:0] clock_div;
    
-   reg 	  out_p1_d, out_p1_q;
-   reg 	  out_p5_d, out_p5_q;
-   reg 	  maple_oe_d, maple_oe_q;
    wire   in_p1;
    wire   in_p5;
-
-   always @(out_p1_q) begin
-      out_p1_d = 1'b1;
-   end
-   always @(out_p5_q) begin
-      out_p5_d = 1'b1;
-   end
-   always @(maple_oe_q) begin
-      maple_oe_d = 1'b0;
-   end
-   
-   always @(posedge clk) begin
-      if (rst) begin
-	 out_p1_q <= 1'b1;
-	 out_p5_q <= 1'b1;
-	 maple_oe_q <= 1'b0;
-      end else begin
-	 out_p1_q <= out_p1_d;
-	 out_p5_q <= out_p5_d;
-	 maple_oe_q <= maple_oe_d;
-      end
-   end
+   wire   out_p1;
+   wire   out_p5;
+   wire   maple_oe;
    
    maple_ports phys_ports
      (
       .pin1(pin1),
       .pin5(pin5),
       .port_select(port_select),
-      .out_p1(out_p1_q),
-      .out_p5(out_p5_q),
-      .oe(maple_oe_q),
+      .out_p1(out_p1),
+      .out_p5(out_p5),
+      .oe(maple_oe),
       .in_p1(in_p1),
       .in_p5(in_p5)
       );
@@ -96,7 +75,9 @@ module maple_interface(
    read_only_reg version_reg(reg_cs[REG_VERSION], reg_we, reg_data_read, VERSION);
    read_write_reg scratchpad_reg(rst, clk, reg_cs[REG_SCRATCHPAD], reg_we, reg_data_read, reg_data_write);
    read_write_reg #(CLOCKDIV_INIT) clockdiv_reg(rst, clk, reg_cs[REG_CLOCKDIV], reg_we, reg_data_read, reg_data_write, clock_div);
-
+   read_write_reg port_select_reg(rst, clk, reg_cs[REG_PORTSEL], reg_we, reg_data_read, reg_data_write, port_select);
+   maple_out out_ctrl(rst, clk, reg_cs[REG_OUTCTRL], reg_we, reg_data_read, reg_data_write, out_p1, out_p5, maple_oe);
+   
    clock_divider clkdiv(clk, rst, clock_div, tick);
    
 endmodule // maple_interface
