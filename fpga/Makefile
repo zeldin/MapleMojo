@@ -11,6 +11,7 @@ maplemojo_VERILOG_SOURCES := \
 	$(SRC)/maplemojo_top.v \
 	$(SRC)/maple_interface.v \
 	$(SRC)/maple_out.v \
+	$(SRC)/maple_in.v \
 	$(SRC)/maple_ports.v \
 	$(SRC)/fifo.v \
 	$(SRC)/regaccess.v \

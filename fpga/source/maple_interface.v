@@ -36,6 +36,12 @@ module maple_interface(
    reg    trigger_out_start;
    reg    trigger_out_end;
 
+   wire   in_status_active;
+   wire   in_status_start;
+   wire   in_status_end;
+   reg    trigger_in_start;
+   reg    trigger_in_end;
+   
    wire [7:0] write_fifo_data_in;
    wire [7:0] write_fifo_data_out;
    wire       write_fifo_produce;
@@ -53,7 +59,6 @@ module maple_interface(
    wire [7:0] read_fifo_data_out;
    wire       read_fifo_produce;
    wire       read_fifo_consume;
-   wire       read_fifo_ready;
    wire       read_data_avail;
    wire       read_fifo_overflow;
    wire       read_fifo_underflow;
@@ -85,6 +90,17 @@ module maple_interface(
       .data_consume(write_fifo_consume)
      );
 
+   maple_in in_ctrl
+     (
+      .rst(rst), .clk(clk),
+      .pin1(in_p1), .pin5(in_p5), .oe(maple_oe),
+      .active(in_status_active),
+      .start_detected(in_status_start), .end_detected(in_status_end),
+      .trigger_start(trigger_in_start), .trigger_end(trigger_in_end),
+      .fifo_data(read_fifo_data_in), .data_produce(read_fifo_produce)
+      );
+   
+   
    fifo #(16) write_fifo
      (
       .rst(rst), .clk(clk),
@@ -100,7 +116,7 @@ module maple_interface(
      (
       .rst(rst), .clk(clk),
       .indata(read_fifo_data_in), .instrobe(read_fifo_produce),
-      .inavail(read_fifo_ready), .inavail_cnt(read_fifo_inavail),
+      .inavail(), .inavail_cnt(read_fifo_inavail),
       .outdata(read_fifo_data_out), .outstrobe(read_fifo_consume),
       .outavail(read_data_avail), .outavail_cnt(read_fifo_outavail),
       .overflow(read_fifo_overflow), .underflow(read_fifo_underflow),
@@ -170,6 +186,8 @@ module maple_interface(
       port_select_d = port_select_q;
       trigger_out_start = 1'b0;
       trigger_out_end = 1'b0;
+      trigger_in_start = 1'b0;
+      trigger_in_end = 1'b0;
       trigger_write_fifo_reset = 1'b0;
       trigger_read_fifo_reset = 1'b0;
       
@@ -214,18 +232,29 @@ module maple_interface(
 	   end
 	end
 	REG_INCTRL: begin
-	   // 7  6  5  4  3 2 1 0
-	   // FR FO FU FT 0 0 0 0
+	   // 7  6  5  4  3  2  1  0
+	   // FR FO FU FT ST ED HT GO
 	   // FR (RO)  1 = FIFO Ready for read from REG_FIFO
 	   // FO (RO)  1 = FIFO Overflow occurred, reset FIFO to clear
 	   // FU (RO)  1 = FIFO Undrflow occurred, reset FIFO to clear
 	   // FT (WO)  1 = Reset FIFO
+	   // ST (RO)  1 = Start pattern detected
+	   // ED (RO)  1 = End pattern detected
+	   // HT (WO)  1 = Halt receive operation
+	   // GO       1 = Receive operation running
+	   //              Write 1 to start receive operation
 	   reg_data_read = {read_data_avail,
 			    read_fifo_overflow,
 			    read_fifo_underflow,
-			    5'b0};
+			    1'b0,
+			    in_status_start,
+			    in_status_end,
+			    1'b0,
+			    in_status_active};
 	   if (reg_write) begin
 	      trigger_read_fifo_reset = reg_data_write[4];
+	      trigger_in_end = reg_data_write[1];
+	      trigger_in_start = reg_data_write[0];
 	   end
 	end
  	REG_OUTFIFO_CNT: reg_data_read = write_fifo_outavail;
