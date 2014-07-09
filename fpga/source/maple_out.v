@@ -46,10 +46,11 @@ module maple_out(
 	 op_start_d = trigger_start;
 	 op_end_d = trigger_end;
 	 maple_oe_d = 1'b1;
-	 cnt_d = 5'b0;
-	 if (trigger_start || !maple_oe_q)
-	   latch_ready_d = 1'b1;
-      end else begin
+	 if (trigger_start || !maple_oe_q) begin
+	    cnt_d = 5'b0;
+	    latch_ready_d = 1'b1;
+	 end
+      end else if (tick) begin
 	 if (op_start_q) begin
 	    // Start pattern
 	    out_p1_d = (cnt_q < 3) || (cnt_q >= 26);
@@ -57,32 +58,28 @@ module maple_out(
 		       (cnt_q != 11) && (cnt_q != 12) &&
 		       (cnt_q != 16) && (cnt_q != 17) &&
 		       (cnt_q != 21) && (cnt_q != 22);
-	    if (tick) begin
-	       if (cnt_q == 27) begin
-		  op_start_d = 1'b0;
-		  cnt_d = 5'b0;
-	       end else begin
-		  cnt_d = cnt_q + 1'b1;
-	       end
+	    if (cnt_q == 27) begin
+	       op_start_d = 1'b0;
+	       cnt_d = 5'b0;
+	    end else begin
+	       cnt_d = cnt_q + 1'b1;
 	    end
 	 end else if(op_end_q && !data_avail && latch_ready_q) begin
 	    // End pattern
 	    out_p1_d = (cnt_q != 6) && (cnt_q != 7) &&
 		       (cnt_q != 11) && (cnt_q != 12);
 	    out_p5_d = (cnt_q < 3) || (cnt_q >= 16);
-	    if (tick) begin
-	       if (cnt_q >= 16) begin
-		  op_end_d = 1'b0;
-		  latch_ready_d = 1'b0;
-		  maple_oe_d = 1'b0;
-		  cnt_d = 5'b0;
-	       end else begin
-		  cnt_d = cnt_q + 1'b1;
-	       end
+	    if (cnt_q >= 16) begin
+	       op_end_d = 1'b0;
+	       latch_ready_d = 1'b0;
+	       maple_oe_d = 1'b0;
+	       cnt_d = 5'b0;
+	    end else begin
+	       cnt_d = cnt_q + 1'b1;
 	    end
 	 end else if(maple_oe_q) begin
 	    // Data transmit
-	    if (tick && !latch_ready_q) begin
+	    if (!latch_ready_q) begin
 	       cnt_d = cnt_q+1'b1;
 	       case (cnt_q)
 		 5'b00000: out_p5_d = data_latch[7];
