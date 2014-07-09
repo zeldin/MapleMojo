@@ -49,6 +49,19 @@ module maple_interface(
    wire [7:0] write_fifo_inavail;
    wire [7:0] write_fifo_outavail;
    
+   wire [7:0] read_fifo_data_in;
+   wire [7:0] read_fifo_data_out;
+   wire       read_fifo_produce;
+   wire       read_fifo_consume;
+   wire       read_fifo_ready;
+   wire       read_data_avail;
+   wire       read_fifo_overflow;
+   wire       read_fifo_underflow;
+   reg        trigger_read_fifo_reset;
+   
+   wire [7:0] read_fifo_inavail;
+   wire [7:0] read_fifo_outavail;
+   
    maple_ports phys_ports
      (
       .pin1(pin1),
@@ -83,6 +96,17 @@ module maple_interface(
       .manual_reset(trigger_write_fifo_reset)
      );
    
+   fifo #(16) read_fifo
+     (
+      .rst(rst), .clk(clk),
+      .indata(read_fifo_data_in), .instrobe(read_fifo_produce),
+      .inavail(read_fifo_ready), .inavail_cnt(read_fifo_inavail),
+      .outdata(read_fifo_data_out), .outstrobe(read_fifo_consume),
+      .outavail(read_data_avail), .outavail_cnt(read_fifo_outavail),
+      .overflow(read_fifo_overflow), .underflow(read_fifo_underflow),
+      .manual_reset(trigger_read_fifo_reset)
+     );
+   
    clock_divider clkdiv
      (
       .clk(clk), .rst(rst),
@@ -100,7 +124,9 @@ module maple_interface(
    localparam REG_INCTRL = 5;
    localparam REG_OUTFIFO_CNT = 6;
    localparam REG_OUTFIFO_FREE = 7;
-   localparam REG_FIFO = 8;
+   localparam REG_INFIFO_CNT = 8;
+   localparam REG_INFIFO_FREE = 9;
+   localparam REG_FIFO = 10;
    
    wire [6:0] reg_num;
    wire reg_read;
@@ -128,7 +154,8 @@ module maple_interface(
 
    assign write_fifo_data_in = reg_data_write;
    assign write_fifo_produce = reg_write && (reg_num == REG_FIFO);
-
+   assign read_fifo_consume = reg_read && (reg_num == REG_FIFO);
+   
    reg [7:0]  scratchpad_d, scratchpad_q;
    reg [7:0]  clock_div_d, clock_div_q;
    reg [1:0]  port_select_d, port_select_q;
@@ -144,6 +171,7 @@ module maple_interface(
       trigger_out_start = 1'b0;
       trigger_out_end = 1'b0;
       trigger_write_fifo_reset = 1'b0;
+      trigger_read_fifo_reset = 1'b0;
       
       case (reg_num)
 	REG_VERSION: reg_data_read = VERSION;
@@ -185,11 +213,27 @@ module maple_interface(
 	      trigger_write_fifo_reset = reg_data_write[4];
 	   end
 	end
-	REG_OUTFIFO_CNT: reg_data_read = write_fifo_outavail;
-	REG_OUTFIFO_FREE: reg_data_read = write_fifo_inavail;
-	REG_FIFO: begin
-	   reg_data_read = 8'b10101010;
+	REG_INCTRL: begin
+	   // 7  6  5  4  3 2 1 0
+	   // FR FO FU FT 0 0 0 0
+	   // FR (RO)  1 = FIFO Ready for read from REG_FIFO
+	   // FO (RO)  1 = FIFO Overflow occurred, reset FIFO to clear
+	   // FU (RO)  1 = FIFO Undrflow occurred, reset FIFO to clear
+	   // FT (WO)  1 = Reset FIFO
+	   reg_data_read = {read_data_avail,
+			    read_fifo_overflow,
+			    read_fifo_underflow,
+			    5'b0};
+	   if (reg_write) begin
+	      trigger_read_fifo_reset = reg_data_write[4];
+	   end
 	end
+ 	REG_OUTFIFO_CNT: reg_data_read = write_fifo_outavail;
+	REG_OUTFIFO_FREE: reg_data_read = write_fifo_inavail;
+	REG_INFIFO_CNT: reg_data_read = read_fifo_outavail;
+	REG_INFIFO_FREE: reg_data_read = read_fifo_inavail;
+ 	REG_FIFO:
+	  reg_data_read = (read_data_avail? read_fifo_data_out : 8'b11111111);
 	
 	default: reg_data_read = 8'b11111111;
       endcase
