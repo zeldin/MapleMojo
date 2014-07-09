@@ -1,16 +1,16 @@
-module regaccess(clk, rst, ss, mosi, miso, sck, regnum, regdata_read, regdata_write, read, write);
-   
-   input  clk;
-   input  rst;
-   input  ss;
-   input  mosi;
-   output miso;
-   input  sck;
-   output [6:0] regnum;
-   input  [7:0] regdata_read;
-   output [7:0] regdata_write;
-   output read;
-   output write;
+module regaccess(
+   input  clk,
+   input  rst,
+   input  ss,
+   input  mosi,
+   output miso,
+   input  sck,
+   output [6:0] regnum,
+   input  [7:0] regdata_read,
+   output [7:0] regdata_write,
+   output read,
+   output write
+ );
    
    wire done;
    wire [7:0] din;
@@ -29,7 +29,12 @@ module regaccess(clk, rst, ss, mosi, miso, sck, regnum, regdata_read, regdata_wr
    assign regdata_write = dout;
    assign din = (read_q? regdata_read : 8'b0);
 
-   spi_slave reg_spi(clk, rst, ss, mosi, miso, sck, done, din, read_q, dout);
+   spi_slave reg_spi
+     (
+      .clk(clk), .rst(rst),
+      .ss(ss), .mosi(mosi), .miso(miso), .sck(sck),
+      .done(done), .din(din), .din_update(read_q), .dout(dout)
+     );
 
    always @(*) begin
       ss_d = ss;

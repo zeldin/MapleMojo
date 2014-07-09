@@ -57,11 +57,31 @@ module maple_interface(
       .in_p5(in_p5)
       );
 
-   maple_out out_ctrl(rst, clk, out_p1, out_p5, maple_oe, out_status_start, out_status_end, trigger_out_start, trigger_out_end, tick, write_fifo_data_out, write_data_avail, write_fifo_consume);
+   maple_out out_ctrl
+     (
+      .rst(rst), .clk(clk),
+      .pin1(out_p1), .pin5(out_p5), .oe(maple_oe),
+      .start_active(out_status_start), .end_active(out_status_end),
+      .trigger_start(trigger_out_start), .trigger_end(trigger_out_end),
+      .tick(tick),
+      .fifo_data(write_fifo_data_out), .data_avail(write_data_avail),
+      .data_consume(write_fifo_consume)
+     );
 
-   fifo #(16) write_fifo(rst, clk, write_fifo_data_in, write_fifo_produce, , write_fifo_inavail, write_fifo_data_out, write_fifo_consume, write_data_avail, write_fifo_outavail);
+   fifo #(16) write_fifo
+     (
+      .rst(rst), .clk(clk),
+      .indata(write_fifo_data_in), .instrobe(write_fifo_produce),
+      .inavail(), .inavail_cnt(write_fifo_inavail),
+      .outdata(write_fifo_data_out), .outstrobe(write_fifo_consume),
+      .outavail(write_data_avail), .outavail_cnt(write_fifo_outavail)
+     );
    
-   clock_divider clkdiv(clk, rst, clock_div, tick);
+   clock_divider clkdiv
+     (
+      .clk(clk), .rst(rst),
+      .divider(clock_div), .tick(tick)
+     );
 
 
    // Registers
