@@ -1,32 +1,25 @@
 module maple_out(
 		 input rst,
 		 input clk,
-		 input cs_ctrl,
-		 input we,
-		 inout [7:0] regdata_out,
-		 input [7:0] regdata_in,
 		 output pin1,
 		 output pin5,
 		 output oe,
+		 output start_active,
+		 output end_active,
+		 input trigger_start,
+		 input trigger_end,
 		 input tick,
 		 input [7:0] fifo_data,
 		 input data_avail,
 		 output data_consume
 		 );
-
-   wire [7:0] ctrl_reg_read;
-   assign ctrl_reg_read = {5'b0, maple_oe_q, op_end_q, op_start_q};
-
-   (* keep="soft" *)
-   wire [7:2] ctrl_reg_ignore;
-   assign ctrl_reg_ignore = regdata_in[7:2];
-   
-   assign regdata_out = (cs_ctrl && !we? ctrl_reg_read : 8'bz);
    
    assign pin1 = out_p1_q;
    assign pin5 = out_p5_q;
    assign oe = maple_oe_q;
-
+   assign start_active = op_start_q;
+   assign end_active = op_end_q;
+   
    assign data_consume = data_avail && latch_ready_q;
    
    reg 	  out_p1_d, out_p1_q;
@@ -49,9 +42,9 @@ module maple_out(
       op_end_d = op_end_q;
       cnt_d = cnt_q;
       latch_ready_d = latch_ready_q;
-      if (cs_ctrl && we && (|regdata_in[1:0])) begin
-	 op_start_d = regdata_in[0];
-	 op_end_d = regdata_in[1];
+      if (trigger_start || trigger_end) begin
+	 op_start_d = trigger_start;
+	 op_end_d = trigger_end;
 	 maple_oe_d = 1'b1;
 	 cnt_d = 5'b0;
 	 latch_ready_d = 1'b0;
