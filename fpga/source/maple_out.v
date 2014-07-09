@@ -17,6 +17,10 @@ module maple_out(
    wire [7:0] ctrl_reg_read;
    assign ctrl_reg_read = {5'b0, maple_oe_q, op_end_q, op_start_q};
 
+   (* keep="soft" *)
+   wire [7:2] ctrl_reg_ignore;
+   assign ctrl_reg_ignore = regdata_in[7:2];
+   
    assign regdata_out = (cs_ctrl && !we? ctrl_reg_read : 8'bz);
    
    assign pin1 = out_p1_q;

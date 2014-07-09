@@ -21,12 +21,13 @@ module fifo(
    endfunction
 
    parameter depth = 16;
-   localparam count_bits = log2(depth);
+   localparam pos_bits = log2(depth);
+   localparam count_bits = log2(depth+1);
    
-   reg [count_bits-1:0] write_pos_d, write_pos_q;
-   reg [count_bits-1:0] read_pos_d, read_pos_q;
-   reg [7:0] inavail_cnt_d, inavail_cnt_q;
-   reg [7:0] outavail_cnt_d, outavail_cnt_q;
+   reg [pos_bits-1:0] write_pos_d, write_pos_q;
+   reg [pos_bits-1:0] read_pos_d, read_pos_q;
+   reg [count_bits-1:0] inavail_cnt_d, inavail_cnt_q;
+   reg [count_bits-1:0] outavail_cnt_d, outavail_cnt_q;
    reg inavail_d, inavail_q;
    reg outavail_d, outavail_q;
 
@@ -50,12 +51,12 @@ module fifo(
       outavail_d = outavail_q;
 
       if (instrobe && outstrobe && inavail_q && outavail_q) begin
-	 write_pos_d = (write_pos_q == depth-1? {count_bits{1'b0}} : write_pos_q+1'b1);
-	 read_pos_d = (read_pos_q == depth-1? {count_bits{1'b0}} : read_pos_q+1'b1);
+	 write_pos_d = (write_pos_q == depth-1? {pos_bits{1'b0}} : write_pos_q+1'b1);
+	 read_pos_d = (read_pos_q == depth-1? {pos_bits{1'b0}} : read_pos_q+1'b1);
       end else begin
 	 if (instrobe) begin
 	    if (inavail_q) begin
-	       write_pos_d = (write_pos_q == depth-1? {count_bits{1'b0}} : write_pos_q+1'b1);
+	       write_pos_d = (write_pos_q == depth-1? {pos_bits{1'b0}} : write_pos_q+1'b1);
 	       inavail_cnt_d = inavail_cnt_q - 1'b1;
 	       outavail_cnt_d = outavail_cnt_q + 1'b1;
 	       if (inavail_cnt_q == 1) begin
@@ -68,7 +69,7 @@ module fifo(
 	 end
 	 if (outstrobe) begin
 	    if (outavail_q) begin
-	       read_pos_d = (read_pos_q == depth-1? {count_bits{1'b0}} : read_pos_q+1'b1);
+	       read_pos_d = (read_pos_q == depth-1? {pos_bits{1'b0}} : read_pos_q+1'b1);
 	       inavail_cnt_d = inavail_cnt_q + 1'b1;
 	       outavail_cnt_d = outavail_cnt_q - 1'b1;
 	       if (outavail_cnt_q == 1) begin
