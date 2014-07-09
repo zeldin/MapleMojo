@@ -120,7 +120,7 @@ module maple_interface(
       .outdata(read_fifo_data_out), .outstrobe(read_fifo_consume),
       .outavail(read_data_avail), .outavail_cnt(read_fifo_outavail),
       .overflow(read_fifo_overflow), .underflow(read_fifo_underflow),
-      .manual_reset(trigger_read_fifo_reset)
+      .manual_reset(trigger_read_fifo_reset || maple_oe)
      );
    
    clock_divider clkdiv
