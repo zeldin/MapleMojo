@@ -15,8 +15,6 @@ maplemojo_VERILOG_SOURCES := \
 	$(SRC)/fifo.v \
 	$(SRC)/regaccess.v \
 	$(SRC)/clock_divider.v \
-	$(SRC)/read_only_reg.v \
-	$(SRC)/read_write_reg.v \
 	$(SRC)/spi_slave.v \
 	$(SRC)/ocpin.v
 

@@ -1,6 +1,4 @@
-module regaccess(clk, rst, ss, mosi, miso, sck, cs, regdata_read, regdata_write, we);
-   
-   parameter num_regs = 128;
+module regaccess(clk, rst, ss, mosi, miso, sck, regnum, regdata_read, regdata_write, read, write);
    
    input  clk;
    input  rst;
@@ -8,11 +6,12 @@ module regaccess(clk, rst, ss, mosi, miso, sck, cs, regdata_read, regdata_write,
    input  mosi;
    output miso;
    input  sck;
-   output [num_regs-1:0] cs;
+   output [6:0] regnum;
    input  [7:0] regdata_read;
    output [7:0] regdata_write;
-   output we;
-
+   output read;
+   output write;
+   
    wire done;
    wire [7:0] din;
    wire [7:0] dout;
@@ -24,11 +23,10 @@ module regaccess(clk, rst, ss, mosi, miso, sck, cs, regdata_read, regdata_write,
    reg read_d, read_q;
    reg write_d, write_q;
 
-   wire [31:0] tmp_cs;
-   assign tmp_cs = (read_q || write_q ? 1<<regnum_q : 0);
-   assign cs = tmp_cs[num_regs-1:0];
-   assign we = we_q;
-   assign regdata_write = (we_q && !rst && regnum_q < num_regs? dout : 8'bz);
+   assign regnum = regnum_q;
+   assign read = read_q;
+   assign write = write_q;
+   assign regdata_write = dout;
    assign din = (read_q? regdata_read : 8'b0);
 
    spi_slave reg_spi(clk, rst, ss, mosi, miso, sck, done, din, read_q, dout);

@@ -28,8 +28,6 @@ module maplemojo_top(
 
    assign led[7:0] = 8'b0;
 
-   wire tick;
-   
    maple_interface maple
      (
       .clk(clk),
@@ -40,8 +38,7 @@ module maplemojo_top(
       .spi_miso(spi_miso),
       .spi_ss(spi_ss),
       .spi_mosi(spi_mosi),
-      .spi_sck(spi_sck),
-      .tick(tick)
+      .spi_sck(spi_sck)
       );
    
 endmodule // maplemojo_top
