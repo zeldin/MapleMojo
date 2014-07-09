@@ -40,8 +40,12 @@ module maple_interface(
    wire [7:0] write_fifo_data_out;
    wire       write_fifo_produce;
    wire       write_fifo_consume;
+   wire       write_fifo_ready;
    wire       write_data_avail;
-
+   wire       write_fifo_overflow;
+   wire       write_fifo_underflow;
+   reg        trigger_write_fifo_reset;
+   
    wire [7:0] write_fifo_inavail;
    wire [7:0] write_fifo_outavail;
    
@@ -72,9 +76,11 @@ module maple_interface(
      (
       .rst(rst), .clk(clk),
       .indata(write_fifo_data_in), .instrobe(write_fifo_produce),
-      .inavail(), .inavail_cnt(write_fifo_inavail),
+      .inavail(write_fifo_ready), .inavail_cnt(write_fifo_inavail),
       .outdata(write_fifo_data_out), .outstrobe(write_fifo_consume),
-      .outavail(write_data_avail), .outavail_cnt(write_fifo_outavail)
+      .outavail(write_data_avail), .outavail_cnt(write_fifo_outavail),
+      .overflow(write_fifo_overflow), .underflow(write_fifo_underflow),
+      .manual_reset(trigger_write_fifo_reset)
      );
    
    clock_divider clkdiv
@@ -137,6 +143,7 @@ module maple_interface(
       port_select_d = port_select_q;
       trigger_out_start = 1'b0;
       trigger_out_end = 1'b0;
+      trigger_write_fifo_reset = 1'b0;
       
       case (reg_num)
 	REG_VERSION: reg_data_read = VERSION;
@@ -153,10 +160,29 @@ module maple_interface(
 	   if (reg_write) port_select_d = reg_data_write[1:0];
 	end
 	REG_OUTCTRL: begin
-	   reg_data_read = {5'b0, maple_oe, out_status_end, out_status_start};
+	   // 7  6  5  4  3 2  1 0
+	   // FR FO FU FT 0 OE MODE
+	   // FR (RO)  1 = FIFO Ready for write to REG_FIFO
+	   // FO (RO)  1 = FIFO Overflow occurred, reset FIFO to clear
+	   // FU (RO)  1 = FIFO Undrflow occurred, reset FIFO to clear
+	   // FT (WO)  1 = Reset FIFO
+	   // OE (RO)  1 = Bus is transmitting
+	   // MODE    00 = Send FIFO data, then hold (if transmitting)
+	   //         01 = Send START, then go to mode 00
+	   //         10 = Send FIFO data, then END
+	   //         11 = Send START, then go to mode 10
+	   //              Write nonzero to MODE to manually change
+	   reg_data_read = {write_fifo_ready,
+			    write_fifo_overflow,
+			    write_fifo_underflow,
+			    2'b0,
+			    maple_oe,
+			    out_status_end,
+			    out_status_start};
 	   if (reg_write) begin
 	      trigger_out_start = reg_data_write[0];
 	      trigger_out_end = reg_data_write[1];
+	      trigger_write_fifo_reset = reg_data_write[4];
 	   end
 	end
 	REG_OUTFIFO_CNT: reg_data_read = write_fifo_outavail;

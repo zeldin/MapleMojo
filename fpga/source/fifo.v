@@ -8,7 +8,10 @@ module fifo(
 	    output [7:0] outdata,
 	    input outstrobe,
 	    output outavail,
-	    output [7:0] outavail_cnt
+	    output [7:0] outavail_cnt,
+	    output overflow,
+	    output underflow,
+	    input manual_reset
 	    );
 
    function integer log2;
@@ -30,7 +33,9 @@ module fifo(
    reg [count_bits-1:0] outavail_cnt_d, outavail_cnt_q;
    reg inavail_d, inavail_q;
    reg outavail_d, outavail_q;
-
+   reg overflow_d, overflow_q;
+   reg underflow_d, underflow_q;
+   
    reg [7:0] fifo [0:depth-1];
 
    assign inavail = inavail_q;
@@ -42,6 +47,9 @@ module fifo(
 
    assign outdata = fifo[read_pos_q];
 
+   assign overflow = overflow_q;
+   assign underflow = underflow_q;
+   
    always @(*) begin
       write_pos_d = write_pos_q;
       read_pos_d = read_pos_q;
@@ -49,7 +57,9 @@ module fifo(
       outavail_cnt_d = outavail_cnt_q;
       inavail_d = inavail_q;
       outavail_d = outavail_q;
-
+      overflow_d = overflow_q;
+      underflow_d = underflow_q;
+      
       if (instrobe && outstrobe && inavail_q && outavail_q) begin
 	 write_pos_d = (write_pos_q == depth-1? {pos_bits{1'b0}} : write_pos_q+1'b1);
 	 read_pos_d = (read_pos_q == depth-1? {pos_bits{1'b0}} : read_pos_q+1'b1);
@@ -65,6 +75,7 @@ module fifo(
 	       outavail_d = 1'b1;
 	    end else begin
 	       // Overrun
+	       overflow_d = 1'b1;
 	    end
 	 end
 	 if (outstrobe) begin
@@ -78,19 +89,22 @@ module fifo(
 	       inavail_d = 1'b1;
 	    end else begin
 	       // Underrun
+	       underflow_d = 1'b1;
 	    end
 	 end
       end
    end
 
    always @(posedge clk) begin
-      if (rst) begin
+      if (rst || manual_reset) begin
 	 write_pos_q <= 0;
 	 read_pos_q <= 0;
 	 inavail_cnt_q <= depth;
 	 outavail_cnt_q <= 0;
 	 inavail_q <= 1'b1;
 	 outavail_q <= 0;
+	 overflow_q <= 0;
+	 underflow_q <= 0;
       end else begin
 	 write_pos_q <= write_pos_d;
 	 read_pos_q <= read_pos_d;
@@ -98,6 +112,8 @@ module fifo(
 	 outavail_cnt_q <= outavail_cnt_d;
 	 inavail_q <= inavail_d;
 	 outavail_q <= outavail_d;
+	 overflow_q <= overflow_d;
+	 underflow_q <= underflow_d;
       end
       if (instrobe && inavail_q) begin
 	 fifo[write_pos_q] <= indata;
