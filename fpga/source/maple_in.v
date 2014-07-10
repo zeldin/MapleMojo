@@ -76,7 +76,11 @@ module maple_in(
 	 case (mode_q)
 	   MODE_PHASE1, MODE_PHASE1_PRE: begin
 	      if (p5_edge && p1_value && cnt_q == 0) begin
-		 mode_d = (mode_q == MODE_PHASE1_PRE? MODE_PHASE1 : MODE_END);
+		 if (mode_q == MODE_PHASE1_PRE) begin
+		    mode_d = MODE_PHASE1;
+		 end else begin
+		    mode_d = MODE_END;
+		 end
 	      end else if (p1_edge) begin
 		 shiftreg_d = { shiftreg_q[5:0], p5_value };
 		 mode_d = MODE_PHASE2;
