@@ -54,6 +54,7 @@ module regaccess(
 	 end else if (we_q) begin
 	    write_d = 1'b1;
 	 end else begin
+	    regnum_d = dout[6:0];
 	    read_d = 1'b1;
 	 end
 	 first_d = 1'b0;
