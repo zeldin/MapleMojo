@@ -34,11 +34,12 @@ module maple_in(
    reg 	     p1_edge, p1_value;
    reg       p5_edge, p5_value;
 
-   localparam MODE_PHASE1 = 0;
-   localparam MODE_PHASE2 = 1;
-   localparam MODE_START = 2;
-   localparam MODE_END = 3;
-   localparam MODE_IDLE = 4;
+   localparam MODE_IDLE = 0;
+   localparam MODE_START = 1;
+   localparam MODE_PHASE1_PRE = 2;
+   localparam MODE_PHASE1 = 3;
+   localparam MODE_PHASE2 = 4;
+   localparam MODE_END = 5;
 
    reg [2:0] mode_d, mode_q;
    reg [2:0] cnt_d, cnt_q;
@@ -73,9 +74,9 @@ module maple_in(
 	 mode_d = mode_q;
 	 cnt_d = cnt_q;
 	 case (mode_q)
-	   MODE_PHASE1: begin
+	   MODE_PHASE1, MODE_PHASE1_PRE: begin
 	      if (p5_edge && p1_value && cnt_q == 0) begin
-		 mode_d = MODE_END;
+		 mode_d = (mode_q == MODE_PHASE1_PRE? MODE_PHASE1 : MODE_END);
 	      end else if (p1_edge) begin
 		 shiftreg_d = { shiftreg_q[5:0], p5_value };
 		 mode_d = MODE_PHASE2;
@@ -102,7 +103,7 @@ module maple_in(
 		 cnt_d = 3'b0;
 		 if (p5_value && cnt_q == 4) begin
 		    start_detected_d = 1'b1;
-		    mode_d = MODE_PHASE1;
+		    mode_d = MODE_PHASE1_PRE;
 		 end else begin
 		    mode_d = MODE_IDLE;
 		 end
