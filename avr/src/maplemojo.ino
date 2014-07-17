@@ -2,6 +2,7 @@
 #include "ring_buffer.h"
 #include <SPI.h>
 #include "flash.h"
+#include "maple.h"
 
 typedef enum {
   IDLE,
