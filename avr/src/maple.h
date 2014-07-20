@@ -11,6 +11,8 @@
 
 #include <stdint.h>
 
+#include "hardware.h"
+
 #define MAPLE_STATUS_OK               0x00
 #define MAPLE_STATUS_NO_START_PATTERN 0x02
 #define MAPLE_STATUS_FIFO_OVERFLOW    0x03
@@ -56,6 +58,13 @@
 #define MAPLE_INCTRL_HALT         0x02
 #define MAPLE_INCTRL_RUN          0x01
 
+static __inline void maple_set_reg(uint8_t reg, uint8_t value)
+{
+  SET(SS, LOW);
+  SPI.transfer(reg|MAPLE_WRITE_FLAG);
+  SPI.transfer(value);
+  SET(SS, HIGH);
+}
 
 uint8_t maple_transaction(const uint8_t* src, uint8_t* dest);
 

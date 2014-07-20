@@ -1,16 +1,11 @@
 #include "maple.h"
 
-#include "hardware.h"
-
 uint8_t maple_transaction(const uint8_t* src, uint8_t* dest)
 {
   uint16_t i, cnt = ((src[0]+1)<<2)+1;
   uint8_t avail;
   if (dest != NULL) {
-    SET(SS, LOW);
-    SPI.transfer(MAPLE_REG_INCTRL|MAPLE_WRITE_FLAG);
-    SPI.transfer(MAPLE_INCTRL_FIFO_RESET|MAPLE_INCTRL_RUN);
-    SET(SS, HIGH);
+    maple_set_reg(MAPLE_REG_INCTRL, MAPLE_INCTRL_FIFO_RESET|MAPLE_INCTRL_RUN);
   }
   SET(SS, LOW);
   SPI.transfer(MAPLE_REG_OUTFIFO_FREE);
@@ -100,10 +95,7 @@ uint8_t maple_transaction(const uint8_t* src, uint8_t* dest)
 	break;
     } while(inctl & MAPLE_INCTRL_RUN);
     SET(SS, HIGH);
-    SET(SS, LOW);
-    SPI.transfer(MAPLE_REG_INCTRL|MAPLE_WRITE_FLAG);
-    SPI.transfer(MAPLE_INCTRL_FIFO_RESET|MAPLE_INCTRL_HALT);
-    SET(SS, HIGH);
+    maple_set_reg(MAPLE_REG_INCTRL, MAPLE_INCTRL_FIFO_RESET|MAPLE_INCTRL_HALT);
     if (inctl != (MAPLE_INCTRL_START_DETECT|MAPLE_INCTRL_END_DETECT)) {
       if (!(inctl & MAPLE_INCTRL_START_DETECT))
 	return MAPLE_STATUS_NO_START_PATTERN;
