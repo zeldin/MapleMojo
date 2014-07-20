@@ -3,6 +3,7 @@
 #include <SPI.h>
 #include "flash.h"
 #include "maple.h"
+#include <USBDesc.h>
 
 typedef enum {
   IDLE,
@@ -22,11 +23,27 @@ taskState_t;
 uint8_t loadBuffer[256];
 volatile taskState_t taskState = SERVICE;
 
+static uint8_t maple_buf[MAPLE_BUFFER_SIZE+1];
+static uint16_t maple_cnt;
+
 /* This is where you should add your own code! Feel free to edit anything here. 
    This function will work just like the Arduino loop() function in that it will
    be called over and over. You should try to not delay too long in the loop to 
    allow the Mojo to enter loading mode when requested. */
 void userLoop() {
+  int16_t w;
+  while ((w = Serial.read()) >= 0) {
+    maple_buf[maple_cnt++] = w;
+    if (maple_cnt == ((maple_buf[0]+1)<<2)+1) {
+      maple_set_reg(MAPLE_REG_CLOCKDIV, 0xc0);
+      maple_set_reg(MAPLE_REG_PORTSEL, maple_buf[1]>>6);
+      byte r = maple_transaction(maple_buf, maple_buf+1);
+      maple_buf[0] = r;
+      maple_cnt = (r? 1 : ((maple_buf[1]+1)<<2)+2);
+      USB_Send(CDC_TX, maple_buf, maple_cnt);
+      maple_cnt = 0;
+    }
+  }
 }
 
 /* this is used to undo any setup you did in initPostLoad */
@@ -39,6 +56,7 @@ void disablePostLoad() {
   SET(PROGRAM, LOW); // reset the FPGA
   IN(INIT);
   SET(INIT, HIGH); // pullup on INIT
+  maple_cnt = 0;
 }
 
 /* Here you can do some setup before entering the userLoop loop */
