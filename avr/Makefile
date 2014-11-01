@@ -1,3 +1,4 @@
+SRCDIR?=$(dir $(lastword $(MAKEFILE_LIST)))
 
 MODEL = MojoV3
 
@@ -10,6 +11,8 @@ SRC := $(SRCDIR)src
 O = obj
 BUILD_FW := .build/$(MODEL)/$(FW)
 
+COMMON = $(SRCDIR)../common
+
 maplemojo_SOURCES := \
 	$(SRC)/maplemojo.ino \
 	$(SRC)/flash.cpp \
@@ -17,7 +20,8 @@ maplemojo_SOURCES := \
 	$(SRC)/maple.cpp \
 	$(SRC)/maple.h \
 	$(SRC)/ring_buffer.h \
-	$(SRC)/hardware.h
+	$(SRC)/hardware.h \
+	$(COMMON)/maple_status.h
 
 all : $O/$(FW)
 
@@ -25,7 +29,7 @@ $O/$(FW) : $(BUILD_FW) | $O
 	cp $< $@
 
 $(BUILD_FW) : $(maplemojo_SOURCES)
-	$(INO) build $(INO_FLAGS)
+	$(INO) build $(INO_FLAGS) --cppflags=-I$(COMMON)
 
 upload: $(BUILD_FW)
 	$(INO) upload $(INO_FLAGS)

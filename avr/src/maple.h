@@ -13,14 +13,7 @@
 
 #include "hardware.h"
 
-#define MAPLE_STATUS_OK               0x00
-#define MAPLE_STATUS_NO_START_PATTERN 0x02
-#define MAPLE_STATUS_FIFO_OVERFLOW    0x03
-#define MAPLE_STATUS_FIFO_UNDERFLOW   0x04
-#define MAPLE_STATUS_REPLY_TOO_LONG   0x05
-#define MAPLE_STATUS_TIMEOUT          0x06
-#define MAPLE_STATUS_REPLY_TOO_SHORT  0x07
-#define MAPLE_STATUS_REPLY_BAD_COUNT  0x08
+#include "maple_status.h"
 
 #define MAPLE_MAX_PACKET_LENGTH 1025 /* 256 words + checksum */
 #define MAPLE_BUFFER_SIZE 1039
