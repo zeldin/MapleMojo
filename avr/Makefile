@@ -13,6 +13,8 @@ BUILD_FW := .build/$(MODEL)/$(FW)
 
 COMMON = $(SRCDIR)../common
 
+FLAGS = -I$(COMMON) -ffunction-sections -fdata-sections -g -Os -w
+
 maplemojo_SOURCES := \
 	$(SRC)/maplemojo.ino \
 	$(SRC)/flash.cpp \
@@ -29,7 +31,7 @@ $O/$(FW) : $(BUILD_FW) | $O
 	cp $< $@
 
 $(BUILD_FW) : $(maplemojo_SOURCES)
-	$(INO) build $(INO_FLAGS) --cppflags=-I$(COMMON)
+	$(INO) build $(INO_FLAGS) -f'$(FLAGS)'
 
 upload: $(BUILD_FW)
 	$(INO) upload $(INO_FLAGS)
