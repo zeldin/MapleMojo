@@ -21,7 +21,7 @@ module maplemojo_top(
     inout spi_miso,
     input spi_ss,
     input spi_mosi,
-    input spi_sck,
+    input spi_sck
     );
 
    wire   rst = ~rst_n;
