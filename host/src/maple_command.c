@@ -2,6 +2,7 @@
 #include "maple_command.h"
 #include "maple_command_codes.h"
 #include "maple_error_codes.h"
+#include "maple_endian.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -30,6 +31,15 @@ static int make_dev_info(const struct maple_header *header,
   if (verlen)
     memcpy(ibuf->version, buf+sizeof(*ibuf), verlen);
   ibuf->version[verlen] = 0;
+#if MAPLE_HOST_BIG_ENDIAN
+  ibuf->standby_power = maple_bswap16(ibuf->standby_power);
+  ibuf->max_power = maple_bswap16(ibuf->max_power);
+#else
+  ibuf->func_codes = maple_bswap32(ibuf->func_codes);
+  ibuf->function_data[0] = maple_bswap32(ibuf->function_data[0]);
+  ibuf->function_data[1] = maple_bswap32(ibuf->function_data[1]);
+  ibuf->function_data[2] = maple_bswap32(ibuf->function_data[2]);
+#endif
   return MAPLE_OK;
 }
 
