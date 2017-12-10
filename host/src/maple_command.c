@@ -45,6 +45,8 @@ static int make_dev_info(const struct maple_header *header,
 
 int maple_scan_port(uint8_t port, struct maple_dev_info *info[6])
 {
+  if (port > 3)
+    return MAPLE_ERROR_BAD_ARGUMENT;
   struct maple_header rheader, header = {
     0, port<<6, (port<<6)|0x20, MAPLE_COMMAND_REQUEST_DEVINFO
   };

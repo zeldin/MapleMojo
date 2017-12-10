@@ -25,6 +25,7 @@
 #define MAPLE_ERROR_UNEXPECTED_RESPONSE            -137
 #define MAPLE_ERROR_INVALID_RESPONSE_LENGTH        -138
 #define MAPLE_ERROR_OUT_OF_MEMORY                  -139
+#define MAPLE_ERROR_BAD_ARGUMENT                   -140
 
 /* Error codes from microcontroller layer */
 
