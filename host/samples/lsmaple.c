@@ -1,5 +1,6 @@
 #include "serial.h"
 #include "maple_command.h"
+#include "maple_function.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -7,16 +8,16 @@
 static const char *function_name(int func)
 {
   switch(func) {
-  case 0: return "controller";
-  case 1: return "memory card";
-  case 2: return "LCD display";
-  case 3: return "clock";
-  case 4: return "microphone";
-  case 5: return "AR-gun";
-  case 6: return "keyboard";
-  case 7: return "light gun";
-  case 8: return "puru puru";
-  case 9: return "mouse";
+  case MAPLE_FUNCTION_CONTROLLER : return "controller";
+  case MAPLE_FUNCTION_MEMORY_CARD: return "memory card";
+  case MAPLE_FUNCTION_LCD_DISPLAY: return "LCD display";
+  case MAPLE_FUNCTION_CLOCK      : return "clock";
+  case MAPLE_FUNCTION_MICROPHONE : return "microphone";
+  case MAPLE_FUNCTION_AR_GUN     : return "AR-gun";
+  case MAPLE_FUNCTION_KEYBOARD   : return "keyboard";
+  case MAPLE_FUNCTION_LIGHT_GUN  : return "light gun";
+  case MAPLE_FUNCTION_PURU_PURU  : return "puru puru";
+  case MAPLE_FUNCTION_MOUSE      : return "mouse";
   }
   return "?";
 }
@@ -146,11 +147,11 @@ static void print_mouse_func_data(uint32_t data)
 static void print_function_data(int func, uint32_t data)
 {
   switch(func) {
-  case 0: print_controller_func_data(data); break;
-  case 1: print_memory_card_func_data(data); break;
-  case 2: print_lcd_display_func_data(data); break;
-  case 6: print_keyboard_func_data(data); break;
-  case 9: print_mouse_func_data(data); break;
+  case MAPLE_FUNCTION_CONTROLLER : print_controller_func_data(data); break;
+  case MAPLE_FUNCTION_MEMORY_CARD: print_memory_card_func_data(data); break;
+  case MAPLE_FUNCTION_LCD_DISPLAY: print_lcd_display_func_data(data); break;
+  case MAPLE_FUNCTION_KEYBOARD   : print_keyboard_func_data(data); break;
+  case MAPLE_FUNCTION_MOUSE      : print_mouse_func_data(data); break;
   }
 }
 

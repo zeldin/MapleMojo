@@ -8,7 +8,8 @@ COMMON = $(SRCDIR)../common
 libmaplemojo_SOURCES := \
 	$(SRC)/serial.c \
 	$(SRC)/maple_transaction.c \
-	$(SRC)/maple_command.c
+	$(SRC)/maple_command.c \
+	$(SRC)/maple_function.c
 
 libmaplemojo_OBJS := \
 	$(addprefix $O/,$(addsuffix .o,$(basename $(notdir $(libmaplemojo_SOURCES)))))
