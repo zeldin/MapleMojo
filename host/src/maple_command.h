@@ -13,6 +13,20 @@ struct maple_dev_info {
   char version[];
 };
 
+struct maple_mem_info {
+  uint32_t dunno1;
+  uint16_t root_loc;
+  uint16_t fat_loc;
+  uint16_t fat_size;
+  uint16_t dir_loc;
+  uint16_t dir_size;
+  uint16_t icon_shape;
+  uint16_t num_blocks;
+  uint16_t dunno2;
+  uint16_t dunno3;
+  uint16_t dunno4;
+};
+
 int maple_probe(uint8_t address);
 
 int maple_scan_port(uint8_t port, struct maple_dev_info *info[6]);
@@ -27,4 +41,8 @@ int maple_get_dev_info(uint8_t address, struct maple_dev_info **info);
 
 int maple_get_dev_info_extended(uint8_t address, struct maple_dev_info **info);
 
+int maple_get_mem_info(uint8_t address, uint32_t func, uint8_t pt, struct maple_mem_info *info);
 
+int maple_block_read(uint8_t address, uint32_t func, uint8_t pt, uint8_t phase, uint16_t block, uint8_t *buf, uint16_t size);
+
+#define maple_address(port, unit) (((port)<<6)|((unit)>0?(((1<<(unit))>>1)&0x1f):0x20))

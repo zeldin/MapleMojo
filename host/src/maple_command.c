@@ -153,4 +153,86 @@ int maple_get_dev_info_extended(uint8_t address, struct maple_dev_info **info)
   return r;
 }
 
+int maple_get_mem_info(uint8_t address, uint32_t func, uint8_t pt, struct maple_mem_info *info)
+{
+  struct maple_header rheader, header = {
+    2, address&0xc0, address, MAPLE_COMMAND_GET_MEMINFO
+  };
+  union {
+    uint32_t u32[2];
+    uint8_t u8[8];
+  } payload = {
+    .u32 = {
+#if MAPLE_HOST_BIG_ENDIAN
+	maple_bswap32(func),
+	maple_bswap32(pt<<24)
+#else
+	func,
+	pt<<24
+#endif
+      }
+  };
+  uint32_t funcecho;
+  int r = maple_transaction_1(&header, payload.u8, sizeof(payload),
+			      &rheader, (uint8_t *)&funcecho, sizeof(funcecho),
+			      (uint8_t *)info, (info? sizeof(struct maple_mem_info) : 0));
+  if (!r) {
+    if (rheader.command != MAPLE_RESPONSE_DATA)
+      r = MAPLE_ERROR_UNEXPECTED_RESPONSE;
+    else if (rheader.payload_words*4 < sizeof(funcecho)+sizeof(struct maple_mem_info))
+      r = MAPLE_ERROR_INVALID_RESPONSE_LENGTH;
+    else if(funcecho != maple_bswap32(payload.u32[0]))
+      r = MAPLE_ERROR_UNEXPECTED_RESPONSE;
+  }
+#if MAPLE_HOST_BIG_ENDIAN
+  if (info && !r) {
+    info->dunno1 = maple_bswap32(info->dunno1);
+    info->root_loc = maple_bswap16(info->root_loc);
+    info->fat_loc = maple_bswap16(info->fat_loc);
+    info->fat_size = maple_bswap16(info->fat_size);
+    info->dir_loc = maple_bswap16(info->dir_loc);
+    info->dir_size = maple_bswap16(info->dir_size);
+    info->icon_shape = maple_bswap16(info->icon_shape);
+    info->num_blocks = maple_bswap16(info->num_blocks);
+    info->dunno2 = maple_bswap16(info->dunno2);
+    info->dunno3 = maple_bswap16(info->dunno3);
+    info->dunno4 = maple_bswap16(info->dunno4);
+  }
+#endif
+  return r;
+}
 
+int maple_block_read(uint8_t address, uint32_t func, uint8_t pt, uint8_t phase, uint16_t block, uint8_t *buf, uint16_t size)
+{
+  struct maple_header rheader, header = {
+    2, address&0xc0, address, MAPLE_COMMAND_BLOCK_READ
+  };
+  union {
+    uint32_t u32[2];
+    uint8_t u8[8];
+  } payload = {
+    .u32 = {
+#if MAPLE_HOST_BIG_ENDIAN
+	maple_bswap32(func),
+	maple_bswap32((pt<<24)|(phase<<16)|block)
+#else
+	func,
+	(pt<<24)|(phase<<16)|block
+#endif
+      }
+  };
+  uint32_t echo[2];
+  int r = maple_transaction_1(&header, payload.u8, sizeof(payload),
+			      &rheader, (uint8_t *)echo, sizeof(echo),
+			      buf, size);
+  if (!r) {
+    if (rheader.command != MAPLE_RESPONSE_DATA)
+      r = MAPLE_ERROR_UNEXPECTED_RESPONSE;
+    else if (rheader.payload_words*4 != sizeof(echo)+size)
+      r = MAPLE_ERROR_INVALID_RESPONSE_LENGTH;
+    else if (echo[0] != maple_bswap32(payload.u32[0]) ||
+	     echo[1] != maple_bswap32(payload.u32[1]))
+      r = MAPLE_ERROR_UNEXPECTED_RESPONSE;
+  }
+  return r;
+}
