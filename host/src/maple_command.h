@@ -13,6 +13,8 @@ struct maple_dev_info {
   char version[];
 };
 
+int maple_probe(uint8_t address);
+
 int maple_scan_port(uint8_t port, struct maple_dev_info *info[6]);
 
 int maple_scan_all_ports(struct maple_dev_info *info[4][6]);

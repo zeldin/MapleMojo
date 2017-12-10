@@ -43,6 +43,19 @@ static int make_dev_info(const struct maple_header *header,
   return MAPLE_OK;
 }
 
+int maple_probe(uint8_t address)
+{
+  struct maple_header rheader, header = {
+    0, address&0xc0, (address&0xc0)|0x20, MAPLE_COMMAND_REQUEST_DEVINFO
+  };
+  int r = maple_transaction_0(&header, &rheader, NULL, 0);
+  if (!r) {
+    if ((rheader.src_address & address & 0x3f) != (address & 0x3f))
+      return MAPLE_ERROR_SUBUNIT_DOES_NOT_EXIST;
+  }
+  return r;
+}
+
 int maple_scan_port(uint8_t port, struct maple_dev_info *info[6])
 {
   if (port > 3)
@@ -110,11 +123,13 @@ void maple_scan_all_ports_free(struct maple_dev_info *info[4][6])
 
 int maple_get_dev_info(uint8_t address, struct maple_dev_info **info)
 {
+  int r = (address & 0x20)? MAPLE_OK : maple_probe(address);
   struct maple_header rheader, header = {
     0, address&0xc0, address, MAPLE_COMMAND_REQUEST_DEVINFO
   };
   uint8_t rbuf[1024];
-  int r = maple_transaction_0(&header, &rheader, rbuf, sizeof(rbuf));
+  if (!r)
+    r = maple_transaction_0(&header, &rheader, rbuf, sizeof(rbuf));
   if (r)
     *info = NULL;
   else
@@ -124,11 +139,13 @@ int maple_get_dev_info(uint8_t address, struct maple_dev_info **info)
 
 int maple_get_dev_info_extended(uint8_t address, struct maple_dev_info **info)
 {
+  int r = (address & 0x20)? MAPLE_OK : maple_probe(address);
   struct maple_header rheader, header = {
     0, address&0xc0, address, MAPLE_COMMAND_REQUEST_DEVINFOX
   };
   uint8_t rbuf[1024];
-  int r = maple_transaction_0(&header, &rheader, rbuf, sizeof(rbuf));
+  if (!r)
+    r = maple_transaction_0(&header, &rheader, rbuf, sizeof(rbuf));
   if (r)
     *info = NULL;
   else
