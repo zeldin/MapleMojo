@@ -35,7 +35,7 @@ void userLoop() {
   while ((w = Serial.read()) >= 0) {
     maple_buf[maple_cnt++] = w;
     if (maple_cnt == ((maple_buf[0]+1)<<2)+1) {
-      maple_set_reg(MAPLE_REG_CLOCKDIV, 0xc0);
+      maple_set_reg(MAPLE_REG_CLOCKDIV, 0x20);
       maple_set_reg(MAPLE_REG_PORTSEL, maple_buf[1]>>6);
       byte r = maple_transaction(maple_buf, maple_buf+1);
       maple_buf[0] = r;
