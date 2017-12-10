@@ -7,12 +7,12 @@
 int maple_transaction_sg(const struct maple_header *header,
 			 const struct maple_sg_block *block, unsigned nblock,
 			 struct maple_header *rheader,
-			 uint8_t *rbuf, size_t rbufsize)
+			 const struct maple_sg_rblock *rblock, unsigned nrblock)
 {
   unsigned i;
-  size_t payload_size = 0;
+  size_t payload_size = 0, rbufsize = 0;
   uint8_t r, csum = 0;
-  uint8_t buf[1025], *bp;
+  uint8_t buf[1025], *bp, *rbuf;
   for(i=0; i<4; i++)
     csum ^= (buf[i] = ((const uint8_t *)header)[i]);
   for(bp = &buf[4], i=0; i<nblock; i++) {
@@ -40,6 +40,11 @@ int maple_transaction_sg(const struct maple_header *header,
   for(i=0; i<4; i++)
     csum ^= (((uint8_t *)rheader)[i] = buf[i]);
   bp = buf+4;
+  while (nrblock--) {
+    rbuf = rblock->data;
+    if ((rbufsize = (*rblock++).len))
+      break;
+  }
   if (payload_size) {
     size_t i = 0;
     if (maple_serial_read(bp, payload_size) != payload_size)
@@ -49,7 +54,12 @@ int maple_transaction_sg(const struct maple_header *header,
       csum ^= b;
       if (rbufsize) {
 	*rbuf++ = b;
-	--rbufsize;
+	if (!--rbufsize)
+	  while (nrblock--) {
+	    rbuf = rblock->data;
+	    if ((rbufsize = (*rblock++).len))
+	      break;
+	  }
       }
     }
     bp += payload_size;
@@ -68,18 +78,26 @@ int maple_transaction_0(const struct maple_header *header,
 			struct maple_header *rheader,
 			uint8_t *rbuf, size_t rbufsize)
 {
-  return maple_transaction_sg(header, NULL, 0, rheader, rbuf, rbufsize);
+  struct maple_sg_rblock rblocks[] = {
+    { rbuf, rbufsize }
+  };
+  return maple_transaction_sg(header, NULL, 0, rheader, rblocks, 1);
 }
 
 int maple_transaction_1(const struct maple_header *header,
 			const uint8_t *payload, size_t payload_size,
 			struct maple_header *rheader,
-			uint8_t *rbuf, size_t rbufsize)
+			uint8_t *rbuf1, size_t rbuf1size,
+			uint8_t *rbuf2, size_t rbuf2size)
 {
   struct maple_sg_block blocks[] = {
     { payload, payload_size }
   };
-  return maple_transaction_sg(header, blocks, 1, rheader, rbuf, rbufsize);
+  struct maple_sg_rblock rblocks[] = {
+    { rbuf1, rbuf1size },
+    { rbuf2, rbuf2size }
+  };
+  return maple_transaction_sg(header, blocks, 1, rheader, rblocks, 2);
 }
 
 int maple_transaction_2(const struct maple_header *header,
@@ -92,5 +110,8 @@ int maple_transaction_2(const struct maple_header *header,
     { payload1, payload1_size },
     { payload2, payload2_size }
   };
-  return maple_transaction_sg(header, blocks, 2, rheader, rbuf, rbufsize);
+  struct maple_sg_rblock rblocks[] = {
+    { rbuf, rbufsize }
+  };
+  return maple_transaction_sg(header, blocks, 2, rheader, rblocks, 1);
 }
