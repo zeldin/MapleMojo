@@ -27,6 +27,8 @@
 #define MAPLE_ERROR_OUT_OF_MEMORY                  -139
 #define MAPLE_ERROR_BAD_ARGUMENT                   -140
 #define MAPLE_ERROR_SUBUNIT_DOES_NOT_EXIST         -141
+#define MAPLE_ERROR_INVALID_NEXT_FAT_ENTRY         -142
+#define MAPLE_ERROR_NO_MORE_DIR_ENTRIES            -143
 
 /* Error codes from microcontroller layer */
 
