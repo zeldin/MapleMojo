@@ -186,7 +186,8 @@ int maple_get_mem_info(uint8_t address, uint32_t func, uint8_t pt, struct maple_
   }
 #if MAPLE_HOST_BIG_ENDIAN
   if (info && !r) {
-    info->dunno1 = maple_bswap32(info->dunno1);
+    info->last_block = maple_bswap32(info->last_block);
+    info->dunno1 = maple_bswap16(info->dunno1);
     info->root_loc = maple_bswap16(info->root_loc);
     info->fat_loc = maple_bswap16(info->fat_loc);
     info->fat_size = maple_bswap16(info->fat_size);

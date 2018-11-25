@@ -16,14 +16,15 @@ struct maple_dev_info {
 };
 
 struct maple_mem_info {
-  uint32_t dunno1;
+  uint16_t last_block;
+  uint16_t dunno1;
   uint16_t root_loc;
   uint16_t fat_loc;
   uint16_t fat_size;
   uint16_t dir_loc;
   uint16_t dir_size;
   uint16_t icon_shape;
-  uint16_t num_blocks;
+  uint16_t num_user_blocks;
   uint16_t dunno2;
   uint16_t dunno3;
   uint16_t dunno4;
