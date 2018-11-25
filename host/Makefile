@@ -16,7 +16,8 @@ libmaplemojo_OBJS := \
 	$(addprefix $O/,$(addsuffix .o,$(basename $(notdir $(libmaplemojo_SOURCES)))))
 
 SAMPLES := \
-	$(O)/lsmaple
+	$(O)/lsmaple \
+	$(O)/vmtool
 
 all: $(O)/libmaplemojo.a $(SAMPLES)
 
