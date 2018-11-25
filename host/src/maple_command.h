@@ -1,3 +1,5 @@
+#ifndef MAPLE_COMMAND_H_
+#define MAPLE_COMMAND_H_
 
 #include <stdint.h>
 
@@ -46,3 +48,5 @@ int maple_get_mem_info(uint8_t address, uint32_t func, uint8_t pt, struct maple_
 int maple_block_read(uint8_t address, uint32_t func, uint8_t pt, uint8_t phase, uint16_t block, uint8_t *buf, uint16_t size);
 
 #define maple_address(port, unit) (((port)<<6)|((unit)>0?(((1<<(unit))>>1)&0x1f):0x20))
+
+#endif /* MAPLE_COMMAND_H_ */
