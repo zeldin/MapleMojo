@@ -2,14 +2,20 @@ SRCDIR?=$(dir $(lastword $(MAKEFILE_LIST)))
 
 MODEL = MojoV3
 
-INO = ino
-INO_FLAGS = -m $(MODEL)
+ARDUINO_DIR = /usr/share/arduino
+ARDUINO_HARDWARE_DIRS = $(ARDUINO_DIR)/hardware $(wildcard $(HOME)/Arduino/hardware)
+ARDUINO_TOOLS_DIR = $(ARDUINO_DIR)/tools
 
-FW = firmware.hex
+ARDUINO_BUILDER = arduino-builder
+ARDUINO_BUILDER_FLAGS = $(addprefix -hardware ,$(ARDUINO_HARDWARE_DIRS)) -tools $(ARDUINO_TOOLS_DIR) -fqbn "embeddedmicro:avr:MojoV3" -build-path "$(abspath $O)"
+
+AVRDUDE = avrdude
+UPLOAD_PORT = /dev/ttyACM0
+
+FW = maplemojo.ino.hex
 
 SRC := $(SRCDIR)src
 O = obj
-BUILD_FW := .build/$(MODEL)/$(FW)
 
 COMMON = $(SRCDIR)../common
 
@@ -27,17 +33,14 @@ maplemojo_SOURCES := \
 
 all : $O/$(FW)
 
-$O/$(FW) : $(BUILD_FW) | $O
-	cp $< $@
+$O/$(FW) : $(maplemojo_SOURCES) | $O
+	$(ARDUINO_BUILDER) $(ARDUINO_BUILDER_FLAGS) -prefs=compiler.cpp.extra_flags='$(FLAGS)' -compile $<
 
-$(BUILD_FW) : $(maplemojo_SOURCES)
-	$(INO) build $(INO_FLAGS) -f'$(FLAGS)'
-
-upload: $(BUILD_FW)
-	$(INO) upload $(INO_FLAGS)
+upload: $O/$(FW)
+	$(AVRDUDE) -patmega32u4 -cavr109 -P$(UPLOAD_PORT) -Uflash:w:"$^":i
 
 clean:
-	$(INO) clean
+	rm -rf $O
 
 $O:
 	mkdir -p $@

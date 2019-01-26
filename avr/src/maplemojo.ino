@@ -26,6 +26,12 @@ volatile taskState_t taskState = SERVICE;
 static uint8_t maple_buf[MAPLE_BUFFER_SIZE+1];
 static uint16_t maple_cnt;
 
+void initLoad();
+void startLoad();
+void sendByte(uint8_t b);
+void sendExtraClocks();
+void loadFromFlash();
+
 /* This is where you should add your own code! Feel free to edit anything here. 
    This function will work just like the Arduino loop() function in that it will
    be called over and over. You should try to not delay too long in the loop to 
