@@ -194,7 +194,7 @@ int maple_get_mem_info(uint8_t address, uint32_t func, uint8_t pt, struct maple_
     info->dir_loc = maple_bswap16(info->dir_loc);
     info->dir_size = maple_bswap16(info->dir_size);
     info->icon_shape = maple_bswap16(info->icon_shape);
-    info->num_blocks = maple_bswap16(info->num_blocks);
+    info->num_user_blocks = maple_bswap16(info->num_user_blocks);
     info->dunno2 = maple_bswap16(info->dunno2);
     info->dunno3 = maple_bswap16(info->dunno3);
     info->dunno4 = maple_bswap16(info->dunno4);
