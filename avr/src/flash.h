@@ -9,7 +9,6 @@
 #ifndef FLASH_H_
 #define FLASH_H_
 
-#include "ring_buffer.h"
 #include "hardware.h"
 
 void SPI_Setup(void);

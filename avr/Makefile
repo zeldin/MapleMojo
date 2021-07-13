@@ -27,7 +27,6 @@ maplemojo_SOURCES := \
 	$(SRC)/flash.h \
 	$(SRC)/maple.cpp \
 	$(SRC)/maple.h \
-	$(SRC)/ring_buffer.h \
 	$(SRC)/hardware.h \
 	$(COMMON)/maple_status.h
 
